@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar by Angela</title>
+<style>
+  body {
+    margin:0; padding:20px;
+    font-family: Arial, sans-serif;
+    background: #0f1113;
+    color: #e8eef0;
+  }
+  h1 { text-align:center; color:#b9924a; }
+  .calendar {
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    max-width: 900px;
+    margin: 20px auto;
+  }
+  .cell {
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  }
+  .cell:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+  }
+  .display-area {
+    max-width:900px;
+    margin: 20px auto;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    padding:20px;
+    display: none;
+    flex-direction: column;
+  }
+  .display-area img {
+    max-width:100%;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .display-area textarea {
+    width:100%;
+    resize:none;
+    border-radius:8px;
+    border:none;
+    padding:10px;
+    margin-bottom:12px;
+    font-size:16px;
+  }
+  .display-area input[type=file] {
+    margin-bottom:12px;
+  }
+</style>
+</head>
+<body>
+<h1>Calendar by Angela</h1>
+<div class="calendar" id="calendar"></div>
+<div class="display-area" id="display">
+  <input type="file" id="fileInput" accept="image/*"><br>
+  <textarea id="displayText" rows="4" placeholder="Zadej text..."></textarea>
+  <img id="displayImg" src="" alt="Fotka">
+  <button id="saveBtn">Uložit</button>
+</div>
+<script>
+const STORAGE_KEY = 'calendar_by_angela_saved';
+const calendar = document.getElementById('calendar');
+const display = document.getElementById('display');
+const displayImg = document.getElementById('displayImg');
+const displayText = document.getElementById('displayText');
+const fileInput = document.getElementById('fileInput');
+const saveBtn = document.getElementById('saveBtn');
+
+// načíst uložená data z localStorage
+let savedData = JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+let currentDay = null;
+
+for(let i=1; i<=24; i++){
+  const cell = document.createElement('div');
+  cell.className='cell';
+  cell.textContent=i;
+  cell.addEventListener('click', ()=>{
+    currentDay = i;
+    display.style.display='flex';
+    displayImg.src = savedData[i]?.img || '';
+    displayText.value = savedData[i]?.text || '';
+  });
+  calendar.appendChild(cell);
+}
+
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){ displayImg.src = ev.target.result; };
+    reader.readAsDataURL(file);
+  }
+});
+
+saveBtn.addEventListener('click', ()=>{
+  if(!currentDay) return;
+  savedData[currentDay] = {
+    img: displayImg.src,
+    text: displayText.value
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
+  alert('Uloženo!');
+});
+</script>
+</body>
+</html>
+
